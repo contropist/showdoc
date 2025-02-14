@@ -6,6 +6,7 @@
       width="500px"
       :onOK="callback"
       :showCancel="false"
+      :showOk="false"
     >
       <div class="text-center">
         <el-form status-icon label-width="100px" class="infoForm">
@@ -45,6 +46,9 @@
         </p>
         <p>
           <span v-html="$t('open_api_tips4')"></span>
+        </p>
+        <p>
+          <span v-html="$t('open_api_tips5')"></span>
         </p>
       </div>
     </SDialog>

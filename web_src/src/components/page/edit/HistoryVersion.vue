@@ -3,8 +3,9 @@
   <div class="">
     <SDialog
       :title="$t('history_version')"
-      :onCancel="callback"
+      :onCancel="cancel"
       :showCancel="false"
+      :showOk="false"
       :onOK="callback"
     >
       <el-table :data="content">
@@ -58,6 +59,7 @@ import { unescapeHTML } from '@/models/page'
 export default {
   props: {
     callback: '',
+    cancel: () => {},
     page_id: '',
     is_modal: true,
     is_show_recover_btn: true
@@ -83,7 +85,6 @@ export default {
           this.dialogTableVisible = true
         } else {
           this.dialogTableVisible = false
-          this.$alert('no data')
         }
       })
     },
