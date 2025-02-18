@@ -10,6 +10,7 @@
         :item_info="item_info"
         :exportFile="exportFile"
         :improtFile="improtFile"
+        :save="save"
       ></HeaderRight>
     </Header>
 
@@ -95,11 +96,11 @@ export default {
       }
       this.request('/api/page/info', {
         page_id: page_id
-      }).then(response => {
-        if (response.data.page_content) {
+      }).then(data => {
+        if (data.data.page_content) {
           let objData
           try {
-            objData = JSON.parse(unescapeHTML(response.data.page_content))
+            objData = JSON.parse(unescapeHTML(data.data.page_content))
           } catch (error) {
             objData = {}
           }

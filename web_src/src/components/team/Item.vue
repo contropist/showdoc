@@ -8,6 +8,7 @@
       :btn1Medthod="addTeamItem"
       :onCancel="callback"
       :showCancel="false"
+      :showOk="false"
       :onOK="callback"
       width="40%"
     >
@@ -69,6 +70,7 @@
       <el-form>
         <el-select
           multiple
+          filterable
           v-model="MyForm.item_id"
           :placeholder="$t('please_choose')"
         >
@@ -119,6 +121,7 @@
           prop="member_username"
           :label="$t('username')"
         ></el-table-column>
+        <el-table-column prop="name" :label="$t('name')"></el-table-column>
         <el-table-column
           prop="member_group_id"
           :label="$t('authority')"

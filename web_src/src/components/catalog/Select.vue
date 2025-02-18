@@ -1,7 +1,7 @@
 <template>
   <div>
     <SDialog
-      :onCancel="callback"
+      :onCancel="cancel"
       :title="$t('select_catalog')"
       width="400px"
       :onOK="
@@ -20,6 +20,7 @@
       <el-form>
         <el-form-item :label="$t('select_catalog')" class="text-left">
           <el-select
+            filterable
             style="width:100%;"
             v-model="new_p_cat_id"
             :placeholder="$t('select_catalog')"
@@ -51,7 +52,7 @@
 import Catalog from '@/components/catalog/Index'
 
 export default {
-  props: ['cat_id', 'item_id', 'callback'],
+  props: ['cat_id', 'item_id', 'callback','cancel'],
   components: { Catalog },
   data() {
     return {

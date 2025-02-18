@@ -3,11 +3,12 @@
     <!--header-->
     <div class="header">
       <div class="header-wrap">
-        <div class="logo">
-          <a href="/">
-            <img src="static/imgs/Logo.png" />
-          </a>
-        </div>
+        <a href="/">
+          <div class="logo">
+            <img class="logo-img" src="@/assets/Logo.svg" />
+            <span class="logo-title">ShowDoc</span>
+          </div>
+        </a>
         <input type="checkbox" name id="mobile-menu-toggle" value />
         <label class="gh" for="mobile-menu-toggle">
           <span></span>
@@ -227,23 +228,23 @@ export default {
       this.height = winHeight + 'px'
     },
     homePageSetting() {
-      var url = DocConfig.server + '/api/common/homePageSetting'
-      this.axios.post(url, this.form).then(response => {
-        if (response.data.error_code === 0) {
-          this.beian = response.data.data.beian
-          if (response.data.data.home_page == 2) {
+      var url = '/api/common/homePageSetting'
+      this.request(url, this.form,'post',false).then(data => {
+        if (data.error_code === 0) {
+          this.beian = data.data.beian
+          if (data.data.home_page == 2) {
             // 跳转到登录页面
             this.$router.replace({
               path: '/user/login'
             })
           }
           if (
-            response.data.data.home_page == 3 &&
-            response.data.data.home_item
+            data.data.home_page == 3 &&
+            data.data.home_item
           ) {
             // 跳转到指定项目
             this.$router.replace({
-              path: '/' + response.data.data.home_item
+              path: '/' + data.data.home_item
             })
           }
         }
@@ -255,8 +256,8 @@ export default {
     this.homePageSetting()
     this.link = '/user/login'
     this.link_text = this.$t('index_login_or_register')
-    getUserInfo(response => {
-      if (response.data.error_code === 0) {
+    getUserInfo(data => {
+      if (data.error_code === 0) {
         this.link = '/item/index'
         this.link_text = this.$t('my_item')
       }

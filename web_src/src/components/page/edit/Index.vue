@@ -4,7 +4,6 @@
       class="sdialog"
       width="98%"
       :visible.sync="dialogVisible"
-      @close="goback"
       :show-close="false"
       top="2vh"
       :append-to-body="true"
@@ -12,7 +11,7 @@
       :close-on-click-modal="false"
     >
       <div slot="title" class="title-header pt-4">
-        <div class="inline-block">
+        <div class="title-header-left">
           <el-button
             class="close-btn"
             type="text"
@@ -21,7 +20,29 @@
           ></el-button>
 
           <el-tooltip effect="dark" :content="$t('click_to_edit_page_title')">
-            <span @click="editTitle" class="page-title">{{ title }}</span>
+            <span
+              @click="isEditingTitle = true"
+              class="page-title"
+              v-if="!isEditingTitle"
+              >{{ title }}</span
+            >
+            <el-input
+              v-model="title"
+              class="page-title-input"
+              v-if="isEditingTitle"
+              @blur="
+                () => {
+                  save()
+                  isEditingTitle = false
+                }
+              "
+              @keyup.enter.native="
+                () => {
+                  save()
+                  isEditingTitle = false
+                }
+              "
+            />
           </el-tooltip>
 
           <el-tooltip effect="dark" :content="$t('select_catalog')">
@@ -34,7 +55,7 @@
           </el-tooltip>
         </div>
 
-        <div class="inline-block float-right">
+        <div  class="title-header-right">
           <el-button class="mr-2" type size="medium" @click="showNotify"
             ><i class="el-icon-s-comment mr-2"></i
             >{{ $t('save_and_notify') }}</el-button
@@ -77,87 +98,105 @@
       <div @keydown.ctrl.83.prevent="save" @keydown.meta.83.prevent="save">
         <el-row class="fun-btn-group">
           <el-dropdown type class="" size="medium" trigger="hover">
-            <el-button icon="el-icon-s-tools">
-              {{ $t('doc_tool')
-              }}<i class="el-icon-arrow-down el-icon--right"></i>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item @click.native="showHistoryVersionDialog = true"
-                ><i class="el-icon-lock"> </i
-                >{{ $t('history_version') }}</el-dropdown-item
-              >
-              <el-dropdown-item @click.native="showAttachment">
-                <el-badge :value="attachment_count"
-                  ><i class="el-icon-upload"> </i
-                  >{{ $t('attachment') }}</el-badge
-                ></el-dropdown-item
-              >
-              <el-dropdown-item @click.native="showSortPage"
-                ><i class="el-icon-sort"> </i
-                >{{ $t('sort_pages') }}</el-dropdown-item
-              >
-
-              <el-dropdown-item @click.native="showJsonToTableDialog = true"
-                ><i class="el-icon-film"> </i
-                >{{ $t('json_to_table') }}</el-dropdown-item
-              >
-              <el-dropdown-item @click.native="showJsonBeautifyDialog = true"
-                ><i class="el-icon-scissors"> </i
-                >{{ $t('beautify_json') }}</el-dropdown-item
-              >
-              <el-dropdown-item @click.native="showPasteTableDialog = true"
-                ><i class="el-icon-attract"> </i
-                >{{ $t('paste_insert_table') }}</el-dropdown-item
-              >
-              <el-dropdown-item
-                @click.native="showSqlToMarkdownTableDialog = true"
-                ><i class="el-icon-takeaway-box"> </i
-                >{{ $t('sql_to_markdown_table') }}</el-dropdown-item
-              >
-              <el-dropdown-item
-                v-if="$lang == 'zh-cn'"
-                @click.native="showMock = true"
-                ><i class="el-icon-video-camera"> </i>Mock
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="$lang == 'zh-cn'"
-                @click.native="showRunApi"
-                ><i class="el-icon-video-camera"> </i
-                >{{ $t('http_test_api') }}</el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </el-dropdown>
-
-          <el-button
-            icon="el-icon-takeaway-box"
-            v-if="$lang == 'zh-cn' && showAIBtn"
-            style="padding-top: 12px;padding-bottom: 12px;"
-            @click.native="showAI = true"
-            size="medium"
-            @click="createContent"
-            >{{ $t('ai_assistant') }}</el-button
-          >
-
-          <el-dropdown type class="" size="medium" trigger="hover">
-            <el-button icon="el-icon-document">
+            <el-button>
+              <i class="mr-1 fas fa-files"></i>
               {{ $t('add_from_template')
               }}<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item @click.native="insertApiTemplate"
-                ><i class="el-icon-chicken"> </i
-                >{{ $t('insert_apidoc_template') }}</el-dropdown-item
+              <el-dropdown-item @click.native="insertApiTemplate">
+                <i class="mr-1 far fa-plug"></i>
+                {{ $t('insert_apidoc_template') }}</el-dropdown-item
               >
-              <el-dropdown-item @click.native="insertDatabaseTemplate"
-                ><i class="el-icon-sugar"> </i
-                >{{ $t('insert_database_doc_template') }}</el-dropdown-item
+              <el-dropdown-item @click.native="insertDatabaseTemplate">
+                <i class="mr-1 far fa-database"></i>
+                {{ $t('insert_database_doc_template') }}</el-dropdown-item
               >
-              <el-dropdown-item @click.native="showTemplateDialog = true"
-                ><i class="el-icon-document-copy"> </i
-                >{{ $t('more_templ') }}</el-dropdown-item
+              <el-dropdown-item @click.native="showTemplateDialog = true">
+                <i class="mr-1 far fa-files"></i>
+                {{ $t('more_templ') }}</el-dropdown-item
               >
             </el-dropdown-menu>
           </el-dropdown>
+          <el-dropdown type class="" size="medium" trigger="hover">
+            <el-button>
+              <i class="mr-1 far fa-gear"></i>
+              {{ $t('format_tools') }}
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item @click.native="showJsonToTableDialog = true">
+                <i class="mr-1 far fa-table"></i>
+                {{ $t('json_to_table') }}</el-dropdown-item
+              >
+              <el-dropdown-item @click.native="showJsonBeautifyDialog = true">
+                <i class="mr-1 far fa-goal-net"></i>
+                {{ $t('beautify_json') }}</el-dropdown-item
+              >
+              <el-dropdown-item @click.native="showPasteTableDialog = true">
+                <i class="mr-1 far fa-table"></i>
+                {{ $t('paste_insert_table') }}</el-dropdown-item
+              >
+              <el-dropdown-item
+                @click.native="showSqlToMarkdownTableDialog = true"
+              >
+                <i class="mr-1 far fa-table"></i>
+                {{ $t('sql_to_markdown_table') }}</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-dropdown type class="" size="medium" trigger="hover">
+            <el-button>
+              <i class="mr-1 fas fa-gear"></i>
+              {{ $t('doc_tool') }}
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item @click.native="showHistoryVersionDialog = true">
+                <i class="mr-1 fas fa-rectangle-history"></i>
+                {{ $t('history_version') }}</el-dropdown-item
+              >
+              <el-dropdown-item
+                v-if="$lang == 'zh-cn' && showAIBtn"
+                @click.native="showAI = true"
+              >
+                <i class="mr-1 far fa-robot"></i>
+                {{ $t('ai_assistant') }}</el-dropdown-item
+              >
+              <el-dropdown-item @click.native="showSortPage">
+                <i class="mr-1 fas fa-sort"></i>
+                {{ $t('sort_pages') }}</el-dropdown-item
+              >
+              <el-dropdown-item
+                v-if="$lang == 'zh-cn'"
+                @click.native="showMock = true"
+              >
+                <i class="mr-1 far fa-database"></i>
+                Mock
+              </el-dropdown-item>
+
+              <el-dropdown-item
+                v-if="$lang == 'zh-cn'"
+                @click.native="showRunApi"
+              >
+                <i class="mr-1 fas fa-link"></i>
+                {{ $t('http_test_api') }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+
+          <el-button
+            style="padding-top: 12px;padding-bottom: 12px;"
+            size="medium"
+            @click.native="showAttachment"
+          >
+            <el-badge :value="attachment_count">
+              <i class="mr-1 fas fa-cloud-arrow-up"></i>
+              {{ $t('attachment') }}</el-badge
+            ></el-button
+          >
         </el-row>
         <Editormd
           v-bind:content="content"
@@ -175,11 +214,14 @@
     <TemplateList
       v-if="showTemplateDialog"
       :item_id="item_id"
+      :cancel="
+        () => {
+          showTemplateDialog = false
+        }
+      "
       :callback="
         data => {
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
           showTemplateDialog = false
         }
       "
@@ -191,12 +233,15 @@
       :is_show_recover_btn="true"
       v-if="showHistoryVersionDialog"
       :page_id="page_id"
+      :cancel="
+        () => {
+          showHistoryVersionDialog = false
+        }
+      "
       :callback="
         data => {
           this.showHistoryVersionDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></HistoryVersion>
@@ -204,12 +249,15 @@
     <!-- Json转表格 组件 -->
     <JsonToTable
       v-if="showJsonToTableDialog"
+      :cancel="
+        () => {
+          showJsonToTableDialog = false
+        }
+      "
       :callback="
         data => {
           this.showJsonToTableDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></JsonToTable>
@@ -217,25 +265,30 @@
     <!-- Json格式化 -->
     <JsonBeautify
       v-if="showJsonBeautifyDialog"
+      :cancel="
+        () => {
+          showJsonBeautifyDialog = false
+        }
+      "
       :callback="
         data => {
           this.showJsonBeautifyDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></JsonBeautify>
-
     <!-- sql转表格 -->
     <SqlToMarkdownTable
       v-if="showSqlToMarkdownTableDialog"
+      :cancel="
+        () => {
+          showSqlToMarkdownTableDialog = false
+        }
+      "
       :callback="
         data => {
           this.showSqlToMarkdownTableDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></SqlToMarkdownTable>
@@ -246,12 +299,15 @@
       :manage="true"
       :page_id="page_id"
       v-if="showAttachmentListDialog"
+      :cancel="
+        () => {
+          showAttachmentListDialog = false
+        }
+      "
       :callback="
         data => {
           this.showAttachmentListDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></AttachmentList>
@@ -259,12 +315,15 @@
     <!-- 粘贴插入表格 -->
     <PasteTable
       v-if="showPasteTableDialog"
+      :cancel="
+        () => {
+          showPasteTableDialog = false
+        }
+      "
       :callback="
         data => {
           this.showPasteTableDialog = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></PasteTable>
@@ -288,16 +347,19 @@
       :page_id="page_id"
       :item_id="item_id"
       v-if="notifyVisiable"
+      :cancel="
+        () => {
+          notifyVisiable = false
+        }
+      "
       :callback="
         data => {
           notifyVisiable = false
-          if (data && typeof data == 'string') {
-            is_notify = 1
-            notify_content = data
-            save(() => {
-              goback()
-            })
-          }
+          is_notify = 1
+          notify_content = data
+          save(() => {
+            goback()
+          })
         }
       "
       ref="Notify"
@@ -307,13 +369,17 @@
       :cat_id="cat_id"
       :item_id="item_id"
       v-if="showSelectCat"
+      :cancel="
+        () => {
+          showSelectCat = false
+        }
+      "
       :callback="
         data => {
           this.showSelectCat = false
-          if (data && (typeof data == 'string' || typeof data == 'number')) {
-            this.cat_id = data
-            refreshCat()
-          }
+          this.cat_id = data
+          refreshCat()
+          save()
         }
       "
     ></SelectCat>
@@ -333,12 +399,15 @@
       :page_id="page_id"
       :item_id="item_id"
       v-if="showAI"
+      :cancel="
+        () => {
+          showAI = false
+        }
+      "
       :callback="
         data => {
           this.showAI = false
-          if (data && typeof data == 'string') {
-            insertValue(data)
-          }
+          insertValue(data)
         }
       "
     ></AI>
@@ -413,7 +482,8 @@ export default {
       showContent: false,
       showMock: false,
       showAI: false,
-      showAIBtn: false
+      showAIBtn: false,
+      isEditingTitle: false
     }
   },
   components: {
@@ -640,10 +710,17 @@ export default {
     },
     goback() {
       var url = '/' + this.item_id + '/' + this.page_id
-      this.$router.push({
+      if(this.page_id){
+        this.callback()
+      }else{
+        this.$router.push({
         path: url
-      })
-      this.callback()
+        }).then(()=>{
+          this.callback()
+        })
+      }
+
+      
     },
     // 另存为模板
     saveToTemplate() {
@@ -1019,12 +1096,27 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 4px;
   cursor: pointer;
+  max-width: 300px; /* 设置最大宽度 */
+  overflow: hidden; /* 超出部分隐藏 */
+  text-overflow: ellipsis; /* 显示省略号 */
+  white-space: nowrap; /* 防止换行 */
 }
 
 .title-header {
+  display: flex;
+  justify-content: space-between; /* 在容器内的子元素之间均匀分配空间 */
+  align-items: center; /* 垂直居中对齐 */
   min-height: 40px;
   padding-bottom: 10px;
 }
+.title-header-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap; /* 防止换行 */
+}
+.title-header-right {
+}
+
 .page-title {
   margin-left: 10px;
   margin-right: 10px;
@@ -1032,6 +1124,12 @@ export default {
 }
 .page-title:hover {
   text-decoration: underline;
+}
+.page-title-input {
+  margin-left: 10px;
+  margin-right: 10px;
+  max-width: 30vw;
+  min-width: 20vw;
 }
 </style>
 
